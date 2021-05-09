@@ -2,35 +2,43 @@ package cli
 
 import (
 	"fmt"
+	beerscli "github.com/LuisCusihuaman/golang-introduction/internal"
 	"github.com/spf13/cobra"
+	"strconv"
 )
-
-var beers = map[string]string{
-	"01D9X58E7NPXX5MVCR9QN794CH": "Mad Jack Mixer",
-	"01D9X5BQ5X48XMMVZ2F2G3R5MS": "Keystone Ice",
-	"01D9X5CVS1M9VR5ZD627XDF6ND": "Belgian Moon",
-}
 
 const idFlag = "id"
 
 // InitBeersCmd initialize beers command
-func InitBeersCmd() *cobra.Command {
-	var beersCmd *cobra.Command = &cobra.Command{
+func InitBeersCmd(repository beerscli.BeerRepo) *cobra.Command {
+	beersCmd := &cobra.Command{
 		Use:   "beers",
 		Short: "Print data about beers",
-		Run:   runBeersFn(),
+		Run:   runBeersFn(repository),
 	}
+
 	beersCmd.Flags().StringP(idFlag, "i", "", "id of the beer")
+
 	return beersCmd
 }
 
+// CobraFn function definition of run cobra command
 type CobraFn func(cmd *cobra.Command, args []string)
 
-func runBeersFn() CobraFn {
+func runBeersFn(repository beerscli.BeerRepo) CobraFn {
 	return func(cmd *cobra.Command, args []string) {
+		beers, _ := repository.GetBeers()
+
 		id, _ := cmd.Flags().GetString(idFlag)
+
 		if id != "" {
-			fmt.Println(beers[id])
+			i, _ := strconv.Atoi(id)
+			for _, beer := range beers {
+				if beer.ProductID == i {
+					fmt.Println(beer)
+					return
+				}
+			}
 		} else {
 			fmt.Println(beers)
 		}
