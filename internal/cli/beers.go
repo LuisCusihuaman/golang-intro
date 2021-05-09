@@ -3,7 +3,9 @@ package cli
 import (
 	"fmt"
 	beerscli "github.com/LuisCusihuaman/golang-introduction/internal"
+	"github.com/LuisCusihuaman/golang-introduction/internal/errors"
 	"github.com/spf13/cobra"
+	"log"
 	"strconv"
 )
 
@@ -27,8 +29,10 @@ type CobraFn func(cmd *cobra.Command, args []string)
 
 func runBeersFn(repository beerscli.BeerRepo) CobraFn {
 	return func(cmd *cobra.Command, args []string) {
-		beers, _ := repository.GetBeers()
-
+		beers, err := repository.GetBeers()
+		if errors.IsDataUnreacheable(err) {
+			log.Fatal(err)
+		}
 		id, _ := cmd.Flags().GetString(idFlag)
 
 		if id != "" {
